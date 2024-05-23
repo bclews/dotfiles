@@ -1,0 +1,34 @@
+# More information about the configuration file can be found at:
+#     https://alacritty.org/config-alacritty.html
+
+# catppuccin-macchiato them taken from:
+#     https://github.com/catppuccin/alacritty
+import = ["~/.config/alacritty/catppuccin-macchiato.toml"]
+working_directory = "/Users/cle126/Developer"
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+# brew install --cask font-hack-nerd-font
+normal = { family = "Hack Nerd Font Mono", style = "Regular" }
+size = 14
+
+[font.offset]
+x = 0
+y = 7
+
+[window]
+decorations = "Full"
+dynamic_padding = true
+decorations_theme_variant = "Dark"
+option_as_alt = "None"
+opacity = 1.0
+startup_mode = "Maximized"
+
+[window.dimensions]
+columns = 80
+lines = 24
+
+[mouse]
+hide_when_typing = true
