@@ -1,5 +1,13 @@
 return {
-  "catppuccin/nvim",
+  {
+    "catppuccin",
+    opts = {
+      lazy = false,
+      transparent_background = true,
+      transparent_sidebar = true,
+      transparent_float = true,
+    },
+  },
   {
     "LazyVim/LazyVim",
     opts = {
