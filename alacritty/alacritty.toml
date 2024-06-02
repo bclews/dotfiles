@@ -6,6 +6,8 @@
 import = ["~/.config/alacritty/catppuccin-macchiato.toml"]
 working_directory = "/Users/cle126/Developer"
 
+live_config_reload = true
+
 [env]
 TERM = "xterm-256color"
 
@@ -19,16 +21,19 @@ x = 0
 y = 7
 
 [window]
-decorations = "Full"
+position = { x = 0, y = 0 }
+dimensions = { columns = 200, lines = 60 }
+decorations = "transparent"
 dynamic_padding = true
 decorations_theme_variant = "Dark"
 option_as_alt = "None"
-opacity = 1.0
-startup_mode = "Maximized"
-
-[window.dimensions]
-columns = 80
-lines = 24
+opacity = 0.8
+blur = true
+startup_mode = "Windowed"
+padding = { x = 10, y = 20 }
 
 [mouse]
 hide_when_typing = true
+
+[cursor]
+style = { shape = "Underline" }
