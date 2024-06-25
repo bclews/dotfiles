@@ -4,15 +4,15 @@ all: stow
 
 # Stow all configuration files
 stow:
-	@for config in $(shell find . -mindepth 1 -maxdepth 1 -type d -exec basename {} \;); do \
+	@for config in $(shell find . -mindepth 1 -maxdepth 1 -type d ! -name '.git' -exec basename {} \;); do \
 		stow $$config; \
 	done
 	@echo "All configurations stowed."
 
 # Unstow all configuration files
 unstow:
-	@for config in $(shell find . -mindepth 1 -maxdepth 1 -type d -exec basename {} \;); do \
-		stow -D $$config; \
+	@for config in $(shell find . -mindepth 1 -maxdepth 1 -type d ! -name '.git' -exec basename {} \;); do \
+    stow $$config; \
 	done
 	@echo "All configurations unstowed."
 
