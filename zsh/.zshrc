@@ -49,6 +49,10 @@ if [ -f '/Users/cle126/Developer/google.cloud/google-cloud-sdk/path.zsh.inc' ]; 
 if [ -f '/Users/cle126/Developer/google.cloud/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/cle126/Developer/google.cloud/google-cloud-sdk/completion.zsh.inc'; fi
 
 # Custom functions and aliases
+alias vim="nvim"
+alias zshrc="vim ~/.zshrc"
+alias zshrcs="source ~/.zshrc"
+alias vimrc="vim ~/.config/nvim"
 alias ls="colorls"
 
 # Ensure Powerlevel10k configuration is sourced correctly
