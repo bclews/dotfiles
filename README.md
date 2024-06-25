@@ -82,7 +82,3 @@ To add a new configuration:
 1. Create a new directory for the application inside the `dotfiles` directory.
 2. Add the configuration files, ensuring the directory structure matches the target location.
 3. Use `stow` to create symlinks for the new configuration.
-
-## License
-
-This repository is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
