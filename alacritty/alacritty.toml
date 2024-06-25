@@ -32,8 +32,5 @@ blur = true
 startup_mode = "Windowed"
 padding = { x = 10, y = 20 }
 
-[mouse]
-hide_when_typing = true
-
 [cursor]
 style = { shape = "Underline" }
