@@ -13,7 +13,7 @@ source $ZSH/oh-my-zsh.sh
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugin settings
-plugins=(git docker docker-compose docker-machine kubectl golang minikube helm zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(gh git docker docker-compose docker-machine kubectl golang minikube helm zsh-autosuggestions zsh-syntax-highlighting)
 
 # Source oh-my-zsh
 source $ZSH/oh-my-zsh.sh
@@ -28,6 +28,7 @@ export PATH="$PYENV_ROOT/bin:$PATH:$(go env GOPATH)/bin"
 
 # Initialize pyenv
 eval "$(pyenv init -)"
+pyenv global 3.10.0
 
 # Source additional scripts
 source ~/powerlevel10k/powerlevel10k.zsh-theme
@@ -36,7 +37,7 @@ source <(fzf --zsh)
 # Source custom completion scripts
 fpath=(~/.zsh/completions $fpath)
 autoload -Uz compinit
-compinit
+compinit -i
 
 # Source Powerlevel10k configuration
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
