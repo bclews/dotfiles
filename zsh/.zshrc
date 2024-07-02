@@ -58,3 +58,6 @@ alias ls="colorls"
 
 # Ensure Powerlevel10k configuration is sourced correctly
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+zstyle ':completion:*' menu select
+fpath+=~/.zfunc
