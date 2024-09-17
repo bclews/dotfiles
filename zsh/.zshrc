@@ -13,7 +13,7 @@ source $ZSH/oh-my-zsh.sh
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugin settings
-plugins=(gh git docker docker-compose docker-machine kubectl golang minikube helm zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(gh git docker docker-compose kubectl golang minikube helm zsh-autosuggestions zsh-syntax-highlighting)
 
 # Source oh-my-zsh
 source $ZSH/oh-my-zsh.sh
@@ -55,9 +55,22 @@ alias zshrc="vim ~/.zshrc"
 alias zshrcs="source ~/.zshrc"
 alias vimrc="vim ~/.config/nvim"
 alias ls="colorls"
+alias ol="ollama run llama3.1"
+alias gpt="sgpt --model azure/omni"
+
+# Set up Azure API credentials
+# export AZURE_API_KEY=$(op item get gpt-4o --vault CSIRO --fields credential --reveal)
+# export AZURE_API_VERSION=$(op item get gpt-4o --vault CSIRO --fields api-version)
+# export AZURE_API_BASE=$(op item get gpt-4o --vault CSIRO --fields base-url)
 
 # Ensure Powerlevel10k configuration is sourced correctly
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 zstyle ':completion:*' menu select
 fpath+=~/.zfunc
+
+# Created by `pipx` on 2024-07-02 05:59:47
+export PATH="$PATH:/Users/cle126/.local/bin"
+export PATH="$PATH:/Users/cle126/.cargo/bin"
+
+if [ -f "/Users/cle126/.config/fabric/fabric-bootstrap.inc" ]; then . "/Users/cle126/.config/fabric/fabric-bootstrap.inc"; fi
