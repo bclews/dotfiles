@@ -30,7 +30,7 @@ brew install stow
 1. Clone the repository to your home directory:
 
 ```sh
-git clone git@github.com:yourusername/dotfiles.git ~/dotfiles
+git clone git@github.com:bclews/dotfiles.git ~/dotfiles
 ```
 
 2. Navigate to the `dotfiles` directory:
