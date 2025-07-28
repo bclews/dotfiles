@@ -1,4 +1,15 @@
+# Load zprof for profiling (keep at top if you intend to profile the whole file)
+#zmodload zsh/zprof
+
+# --- Zsh Completion Setup (Optimized for Daily Cache Rebuild) ---
+# All `fpath` modifications MUST happen BEFORE compinit.
+fpath=(~/.zsh/completions /Users/cle126/.docker/completions ~/.zfunc $fpath)
+
+# Path to the zcompdump file
+ZCOMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump"
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# This ensures your prompt appears quickly even before the rest of zshrc loads.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -6,48 +17,59 @@ fi
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-# Load oh-my-zsh
-source $ZSH/oh-my-zsh.sh
+# --- OH-MY-ZSH OPTIMIZATIONS (NEW ADDITIONS) ---
+# Disable Oh My Zsh auto-updates to save startup time
+DISABLE_AUTO_UPDATE="true"
 
-# Set theme
+# Set theme (Oh My Zsh will source it based on this variable)
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# Plugin settings
-plugins=(gh git docker docker-compose kubectl golang minikube helm zsh-autosuggestions zsh-syntax-highlighting)
+# Plugin settings - List all plugins here
+plugins=(
+  docker
+  docker-compose
+  gh
+  git
+  golang
+  helm
+  kubectl
+  minikube
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
 
-# Source oh-my-zsh
-source $ZSH/oh-my-zsh.sh
+# Load oh-my-zsh (MUST be sourced only once)
+source "$ZSH/oh-my-zsh.sh"
 
-# User configuration
+# --- User Configuration Starts Here ---
 
-# Set up paths
+# Set up common paths
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 export JAVA_HOME=$(/usr/libexec/java_home)
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH:$(go env GOPATH)/bin"
 
-# Initialize pyenv
-eval "$(pyenv init -)"
-pyenv global 3.10.0
+# --- Tool Version Managers (Mise) ---
+# Mise activation (ONLY ONCE)
+eval "$(mise activate zsh)"
 
-# Source additional scripts
-source ~/powerlevel10k/powerlevel10k.zsh-theme
-source <(fzf --zsh)
+# Go Path (Added back - necessary for Go binaries outside of mise's direct management)
+export PATH="$PATH:$(go env GOPATH)/bin"
 
-# Source custom completion scripts
-fpath=(~/.zsh/completions $fpath)
-autoload -Uz compinit
-compinit -i
-
-# Source Powerlevel10k configuration
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# Source other custom scripts and settings
-source /Users/cle126/.config/op/plugins.sh
+# Source additional scripts/configs
+source <(fzf --zsh) # fzf init
 
 # Google Cloud SDK setup
 if [ -f '/Users/cle126/Developer/google.cloud/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/cle126/Developer/google.cloud/google-cloud-sdk/path.zsh.inc'; fi
 if [ -f '/Users/cle126/Developer/google.cloud/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/cle126/Developer/google.cloud/google-cloud-sdk/completion.zsh.inc'; fi
+
+# --- Powerlevel10k Configuration ---
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# --- Zsh Autosuggestions Optimization ---
+export ZSH_AUTOSUGGEST_DEBOUNCE_TIME=50 # milliseconds. Adjust as needed.
+export ZSH_AUTOSUGGEST_USE_ASYNC="true"
+
+# --- Other Custom Scripts and Settings ---
+source /Users/cle126/.config/op/plugins.sh
 
 # Custom functions and aliases
 alias vim="nvim"
@@ -58,19 +80,26 @@ alias ls="colorls"
 alias ol="ollama run llama3.1"
 alias gpt="sgpt --model azure/omni"
 
-# Set up Azure API credentials
-# export AZURE_API_KEY=$(op item get gpt-4o --vault CSIRO --fields credential --reveal)
-# export AZURE_API_VERSION=$(op item get gpt-4o --vault CSIRO --fields api-version)
-# export AZURE_API_BASE=$(op item get gpt-4o --vault CSIRO --fields base-url)
-
-# Ensure Powerlevel10k configuration is sourced correctly
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-zstyle ':completion:*' menu select
-fpath+=~/.zfunc
-
-# Created by `pipx` on 2024-07-02 05:59:47
+# Pipx and Cargo paths
 export PATH="$PATH:/Users/cle126/.local/bin"
 export PATH="$PATH:/Users/cle126/.cargo/bin"
 
+# Fabric bootstrap
 if [ -f "/Users/cle126/.config/fabric/fabric-bootstrap.inc" ]; then . "/Users/cle126/.config/fabric/fabric-bootstrap.inc"; fi
+
+# Thefuck alias
+eval $(thefuck --alias)
+
+# PostgreSQL paths
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
+
+# Go
+export PATH="$PATH:$(go env GOPATH)/bin"
+
+# Zsh completion style
+zstyle ':completion:*' menu select
+
+# Run zprof to output profiling data
+#zprof
