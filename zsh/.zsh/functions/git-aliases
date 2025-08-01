@@ -1,14 +1,45 @@
-# Pretty-prints all Git aliases from ~/.gitconfig
+# --- Function to list Git aliases and their comments from ~/.gitconfig ---
 git-aliases() {
-  git config --get-regexp '^alias\.' |
-  sed 's/^alias\.//' |
-  sort |
-  awk 'BEGIN {
-    c1 = "\033[1;36m"
-    c2 = "\033[0;37m"
-    reset = "\033[0m"
-  }
-  {
-    printf "%s%-12s%s %s%s\n", c1, $1, reset, c2, substr($0, index($0,$2))
-  }'
+  local git_config_file="${HOME}/.gitconfig"
+
+  if [[ ! -f "$git_config_file" ]]; then
+    echo "git-aliases: error: ~/.gitconfig not found" >&2
+    return 1
+  fi
+
+  awk '
+    # Set a flag when entering the [alias] section, ignoring surrounding whitespace.
+    /^[[:space:]]*\[alias\][[:space:]]*$/ { in_alias = 1; next }
+    # Unset the flag when entering any other section.
+    /^[[:space:]]*\[/ { in_alias = 0 }
+    # Skip any lines that are not in the [alias] section.
+    !in_alias { next }
+
+    # If a line is a comment, capture its content.
+    /^[[:space:]]*#/ {
+      # Store the line, removing the leading "#" and any space after it.
+      comment = $0
+      sub(/^[[:space:]]*#/, "", comment)
+      sub(/^[[:space:]]+/, "", comment)
+      next
+    }
+
+    # If a line has an "=" and we have a comment stored, it is a commented alias.
+    /=/ && comment != "" {
+      # To extract the alias, copy the line and trim everything from "=" onwards.
+      alias_name = $0
+      sub(/[[:space:]]*=.*/, "", alias_name)
+      sub(/^[[:space:]]*/, "", alias_name) # Trim leading space from the alias itself.
+
+      # Print the formatted result.
+      printf "\033[1m%-12s\033[0m - %s\n", alias_name, comment
+      
+      # Reset the comment so it is not used for the next alias.
+      comment = ""
+      next
+    }
+
+    # For any other line (e.g., a blank one), reset the comment to avoid mismatches.
+    { comment = "" }
+  ' "$git_config_file"
 }

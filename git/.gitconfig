@@ -65,15 +65,53 @@
 
 # --- Aliases ---
 [alias]
-  lg = log --graph --abbrev-commit --decorate --date=relative \
-           --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)'
+  # Detailed, colorful Git log with a graph, relative dates, and decorations.
+  lg = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)'
+
+  # Short for 'checkout'.
   co = checkout
+
+  # Short for 'branch'.
   br = branch
+
+  # Short for 'status -sb' (short and branch info).
   st = status -sb
+
+  # Amend the last commit without changing its message.
   amend = commit --amend --no-edit
+
+  # Commit all changes with a "Work In Progress" message.
   wip = "!git add -A && git commit -m 'WIP'"
+
+  # Unstage all currently staged changes.
   unstage = reset HEAD --
+
+  # Show the last commit.
   last = log -1 HEAD
+
+  # Start an interactive rebase.
+  ir = rebase -i
+
+  # Interactively stage parts of modified files.
+  addp = add -p
+
+  # Show the commit history for a specific file (use: `git history <filename>`).
+  history = log --follow
+
+  # Remove untracked files and directories. Use with caution!
+  clean = clean -fd
+
+  # Stash all changes, including untracked files.
+  sa = stash save -u
+
+  # List all stashes.
+  sl = stash list
+
+  # Apply the most recent stash and remove it from the stash list.
+  sp = stash pop
+
+  # Delete a specific stash from the stash list.
+  sd = stash drop
 
 # --- Colors ---
 [color "branch"]
