@@ -2,44 +2,85 @@
   path = ~/.gitconfig.local
   path = ~/dotfiles/config/catppuccin-delta/catppuccin.gitconfig
 
+# --- Signing & Security ---
 [gpg]
   format = ssh
-
 [gpg "ssh"]
   program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-
 [commit]
   gpgsign = true
 
+# --- Large File Support ---
 [filter "lfs"]
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
-[push]
-	autosetupremote = true
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+  clean = git-lfs clean -- %f
+
+# --- Branching & Pull Behavior ---
 [init]
-	defaultBranch = main
-[diff]
-	algorithm = histogram
-	colorMoved = default
+  defaultBranch = main
 [branch]
-	sort = -committerdate
+  sort = -committerdate
+[pull]
+  rebase = true
+  ff = only
+[push]
+  autoSetupRemote = matching
+
+# --- Diffs & Merges ---
+[diff]
+  algorithm = histogram
+  colorMoved = default
 [merge]
-	conflictstyle = zdiff3
+  conflictstyle = zdiff3
+  tool = nvimdiff
+[difftool]
+  prompt = false
+
+# --- Core ---
 [core]
-	editor = nvim
-	; hooksPath = /Users/cle126/.git_hooks
+  editor = nvim
+  fsmonitor = true
+  ; hooksPath = /Users/cle126/.git_hooks
+
+# --- Pager & Delta ---
 [pager]
-	diff = delta
-	log = delta
-	show = delta
+  diff = delta
+  log = delta
+  show = delta
 [delta]
-	features = catppuccin-macchiato
-	side-by-side = true
-	dark = true
-	line-numbers = true
-	navigate = true
-	hyperlinks = true
+  features = catppuccin-macchiato
+  syntax-theme="Catppuccin Macchiato"
+  side-by-side = true
+  dark = true
+  line-numbers = true
+  navigate = true
+  hyperlinks = true
+  file-decoration-style = bold yellow ul
+[interactive]
+  diffFilter = delta --color-only
+[blame]
+  color-by-age = true
 
+# --- Aliases ---
+[alias]
+  lg = log --graph --abbrev-commit --decorate --date=relative \
+           --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)'
+  co = checkout
+  br = branch
+  st = status -sb
+  amend = commit --amend --no-edit
+  wip = "!git add -A && git commit -m 'WIP'"
+  unstage = reset HEAD --
+  last = log -1 HEAD
 
+# --- Colors ---
+[color "branch"]
+  current = yellow reverse
+  local = green
+  remote = cyan
+
+# --- Commit Template (Optional) ---
+; [commit]
+;   template = ~/.gitmessage.txt
