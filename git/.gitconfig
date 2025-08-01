@@ -1,5 +1,6 @@
 [include]
   path = ~/.gitconfig.local
+  path = ~/dotfiles/config/catppuccin-delta/catppuccin.gitconfig
 
 [gpg]
   format = ssh
@@ -34,8 +35,11 @@
 	log = delta
 	show = delta
 [delta]
+  features = catppuccin-macchiato
 	side-by-side = true
 	dark = true
 	line-numbers = true
 	navigate = true
 	hyperlinks = true
+
+
