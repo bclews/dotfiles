@@ -35,7 +35,7 @@
 	log = delta
 	show = delta
 [delta]
-  features = catppuccin-macchiato
+	features = catppuccin-macchiato
 	side-by-side = true
 	dark = true
 	line-numbers = true
