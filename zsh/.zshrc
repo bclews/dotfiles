@@ -4,6 +4,8 @@
 # --- Zsh Completion Setup (Optimized for Daily Cache Rebuild) ---
 # All `fpath` modifications MUST happen BEFORE compinit.
 fpath=(~/.zsh/completions /Users/cle126/.docker/completions ~/.zfunc $fpath)
+fpath=(~/.zsh/functions $fpath)
+autoload -Uz git-aliases
 
 # Path to the zcompdump file
 ZCOMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump"

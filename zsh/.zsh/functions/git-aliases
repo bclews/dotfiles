@@ -1,0 +1,14 @@
+# Pretty-prints all Git aliases from ~/.gitconfig
+git-aliases() {
+  git config --get-regexp '^alias\.' |
+  sed 's/^alias\.//' |
+  sort |
+  awk 'BEGIN {
+    c1 = "\033[1;36m"
+    c2 = "\033[0;37m"
+    reset = "\033[0m"
+  }
+  {
+    printf "%s%-12s%s %s%s\n", c1, $1, reset, c2, substr($0, index($0,$2))
+  }'
+}
