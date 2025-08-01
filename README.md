@@ -16,6 +16,7 @@ The table below shows how GNU Stow maps dotfiles to their corresponding location
 | `~/.config/nvim`      | &#8594;                          | `nvim/.config/nvim`           |
 | `~/.config/alacritty` | &#8594;                          | `alacritty/.config/alacritty` |
 | `~/.zshrc`            | &#8594;                          | `zsh/.zshrc`                  |
+| `~/.gitconfig`        | &#8594;                          | `git/.gitconfig`              |
 
 ## Prerequisites
 
@@ -45,6 +46,7 @@ cd ~/dotfiles
 stow alacritty
 stow bat
 stow btop
+stow git
 stow neofetch
 stow nvim
 ```
@@ -73,6 +75,23 @@ make unstow
 
 ```sh
 make help
+```
+
+## Git Configuration Security
+
+The git package uses an include pattern to separate sensitive data from the repository:
+
+- `git/.gitconfig` contains public configuration (committed to repo)
+- `~/.gitconfig.local` contains sensitive data like signing keys (local only, never committed)
+
+**Setup on new machines:**
+After stowing the git package, create `~/.gitconfig.local` with your personal information:
+
+```ini
+[user]
+  signingkey = your-ssh-key-here
+  email = your-email@example.com
+  name = Your Name
 ```
 
 ## Adding New Configurations

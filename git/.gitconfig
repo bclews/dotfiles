@@ -1,0 +1,41 @@
+[include]
+  path = ~/.gitconfig.local
+
+[gpg]
+  format = ssh
+
+[gpg "ssh"]
+  program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+
+[commit]
+  gpgsign = true
+
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+[push]
+	autosetupremote = true
+[init]
+	defaultBranch = main
+[diff]
+	algorithm = histogram
+	colorMoved = default
+[branch]
+	sort = -committerdate
+[merge]
+	conflictstyle = zdiff3
+[core]
+	editor = nvim
+	; hooksPath = /Users/cle126/.git_hooks
+[pager]
+	diff = delta
+	log = delta
+	show = delta
+[delta]
+	side-by-side = true
+	dark = true
+	line-numbers = true
+	navigate = true
+	hyperlinks = true
