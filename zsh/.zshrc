@@ -19,6 +19,12 @@ fi
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+# Ignore duplicates
+setopt HIST_IGNORE_DUPS
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_FIND_NO_DUPS
+
 # --- OH-MY-ZSH OPTIMIZATIONS (NEW ADDITIONS) ---
 # Disable Oh My Zsh auto-updates to save startup time
 DISABLE_AUTO_UPDATE="true"
@@ -73,14 +79,20 @@ export ZSH_AUTOSUGGEST_USE_ASYNC="true"
 # --- Other Custom Scripts and Settings ---
 source /Users/cle126/.config/op/plugins.sh
 
-# Custom functions and aliases
-alias vim="nvim"
-alias zshrc="vim ~/.zshrc"
+# --- Custom functions and aliases ---
+alias cat=bat
+
+# ZSH
+alias zshrc="nvim ~/.zshrc"
 alias zshrcs="source ~/.zshrc"
-alias vimrc="vim ~/.config/nvim"
-alias ls="colorls"
+
+# Eza
+alias l="eza -l --icons --git -a"
+alias lt="eza --tree --level=2 --long --icons --git"
+alias ltree="eza --tree --level=2  --icons --git"
+
+# LLM
 alias ol="ollama run llama3.1"
-alias gpt="sgpt --model azure/omni"
 
 # Pipx and Cargo paths
 export PATH="$PATH:/Users/cle126/.local/bin"
@@ -91,6 +103,9 @@ if [ -f "/Users/cle126/.config/fabric/fabric-bootstrap.inc" ]; then . "/Users/cl
 
 # Thefuck alias
 eval $(thefuck --alias)
+
+# Zoxide
+eval "$(zoxide init zsh)"
 
 # PostgreSQL paths
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
@@ -105,3 +120,8 @@ zstyle ':completion:*' menu select
 
 # Run zprof to output profiling data
 #zprof
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/cle126/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
