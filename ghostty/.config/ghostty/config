@@ -1,0 +1,54 @@
+# Environment
+term = xterm-256color
+
+# Working directory (from Alacritty config)
+working-directory = /Users/cle126/Developer
+
+# Font configuration
+font-family = "Hack Nerd Font Mono"
+font-size = 14
+adjust-cell-height = 7
+
+# Window configuration
+window-width = 200
+window-height = 60
+window-decoration = false
+# Minimal title bar
+window-title-font-family = "Hack Nerd Font Mono"
+window-padding-x = 10
+window-padding-y = 20
+window-theme = dark
+background-opacity = 0.8
+background-blur-radius = 20
+
+# Cursor
+cursor-style = underline
+
+# Use built-in Catppuccin Macchiato theme
+theme = Catppuccin Macchiato
+
+# Shell integration - auto-detect shell type
+shell-integration = detect
+shell-integration-features = cursor,sudo,title
+
+# Mouse features
+mouse-hide-while-typing = true
+copy-on-select = true
+click-repeat-interval = 300
+
+# Tabs and splits (Ghostty's native windowing)
+quit-after-last-window-closed = true
+
+# Image protocol support (for displaying images in terminal)
+image-storage-limit = 320000000
+
+# Advanced font rendering
+font-feature = -kern,+liga,+clig
+font-thicken = true
+
+# Keybindings for Ghostty-specific features
+keybind = cmd+shift+enter=new_split:right
+keybind = cmd+shift+down=new_split:down
+keybind = cmd+shift+left=goto_split:previous
+keybind = cmd+shift+right=goto_split:next
+
