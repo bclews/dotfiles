@@ -1,5 +1,5 @@
 # Environment
-term = xterm-256color
+# term = xterm-256color
 
 # Working directory (from Alacritty config)
 working-directory = /Users/cle126/Developer
@@ -39,8 +39,8 @@ click-repeat-interval = 300
 # Tabs and splits (Ghostty's native windowing)
 quit-after-last-window-closed = true
 
-# Image protocol support (for displaying images in terminal)
-image-storage-limit = 320000000
+# # Image protocol support (for displaying images in terminal)
+# image-storage-limit = 320000000
 
 # Advanced font rendering
 font-feature = -kern,+liga,+clig

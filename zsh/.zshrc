@@ -115,6 +115,9 @@ export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
 # Go
 export PATH="$PATH:$(go env GOPATH)/bin"
 
+# Use Ghostty’s recommended $TERM 
+export TERM=ghostty
+
 # Zsh completion style
 zstyle ':completion:*' menu select
 
