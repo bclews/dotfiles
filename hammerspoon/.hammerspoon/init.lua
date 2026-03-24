@@ -11,13 +11,15 @@ hs.alert.show("Hammerspoon loaded")
 
 -- App launchers (Hyper)
 local apps = {
-	t = "Ghostty",
-	b = "Safari",
-	s = "Slack",
-	f = "Finder",
-	m = "Mail",
-	o = "Obsidian",
+	c = "Claude",
+	g = "Ghostty",
+	m = "Messages",
+	n = "Notes",
+	o = "Microsoft Outlook",
 	p = "1Password",
+	s = "Safari",
+	t = "Microsoft Teams",
+	x = "Xcode",
 }
 
 for key, app in pairs(apps) do
@@ -29,8 +31,6 @@ end
 -- Website launchers (Meh)
 local sites = {
 	g = "https://github.com",
-	c = "https://claude.ai",
-	y = "https://youtube.com",
 }
 
 for key, url in pairs(sites) do
@@ -38,6 +38,15 @@ for key, url in pairs(sites) do
 		hs.urlevent.openURL(url)
 	end)
 end
+
+-- System app launchers (Hyper) - these need special handling
+hs.hotkey.bind(hyper, "a", function()
+	hs.application.open("com.apple.ActivityMonitor")
+end)
+
+hs.hotkey.bind(hyper, "f", function()
+	hs.application.open("com.apple.finder")
+end)
 
 -- Reload config
 hs.hotkey.bind(hyper, "r", function()
