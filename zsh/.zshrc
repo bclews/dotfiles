@@ -47,18 +47,10 @@ export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always --level=2 {}'"
 source <(fzf --zsh)
 
 eval "$(zoxide init zsh)"
-eval "$(thefuck --alias)"
 
 # Colorized man pages via bat
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 export MANROFFOPT="-c"
-
-if [ -f "$HOME/Developer/google.cloud/google-cloud-sdk/path.zsh.inc" ]; then
-  . "$HOME/Developer/google.cloud/google-cloud-sdk/path.zsh.inc"
-fi
-if [ -f "$HOME/Developer/google.cloud/google-cloud-sdk/completion.zsh.inc" ]; then
-  . "$HOME/Developer/google.cloud/google-cloud-sdk/completion.zsh.inc"
-fi
 
 [ -f "$HOME/.config/op/plugins.sh" ] && source "$HOME/.config/op/plugins.sh"
 [ -f "$HOME/.config/fabric/fabric-bootstrap.inc" ] && . "$HOME/.config/fabric/fabric-bootstrap.inc"
