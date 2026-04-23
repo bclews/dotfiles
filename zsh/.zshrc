@@ -38,9 +38,20 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 export TERM=ghostty
 
 # --- Tool integrations ---
+# fzf: fd for listing (respects .gitignore, hides .git), bat/eza previews
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always --level=2 {}'"
 source <(fzf --zsh)
+
 eval "$(zoxide init zsh)"
 eval "$(thefuck --alias)"
+
+# Colorized man pages via bat
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANROFFOPT="-c"
 
 if [ -f "$HOME/Developer/google.cloud/google-cloud-sdk/path.zsh.inc" ]; then
   . "$HOME/Developer/google.cloud/google-cloud-sdk/path.zsh.inc"
