@@ -71,3 +71,6 @@ export ZSH_AUTOSUGGEST_DEBOUNCE_TIME=50
 export ZSH_AUTOSUGGEST_USE_ASYNC="true"
 source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
 antidote load ~/.zsh/plugins.txt
+
+# --- Key bindings ---
+source ~/.zsh/keybindings.zsh
