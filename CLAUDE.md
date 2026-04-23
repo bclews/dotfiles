@@ -60,3 +60,15 @@ The git package uses an include pattern to separate sensitive data:
   [user]
     signingkey = your-ssh-key-here
   ```
+
+### jj Configuration Security
+
+The jj package uses jj's multi-file config directory support to separate sensitive data:
+- `jj/.config/jj/config.toml` contains public configuration (committed to repo)
+- `~/.config/jj/user.toml` contains name and email (local only, not committed)
+- When setting up on a new machine, create `~/.config/jj/user.toml`:
+  ```toml
+  [user]
+  name = "Your Name"
+  email = "your@email.com"
+  ```
