@@ -10,7 +10,8 @@ This is a dotfiles repository organized for use with GNU Stow, a symlink manager
 
 ### GNU Stow Operations
 - `make stow` or `make` - Stow all configurations (creates symlinks)
-- `make unstow` - Unstow all configurations (removes symlinks) 
+- `make unstow` - Unstow all configurations (removes symlinks)
+- `make completions` - Regenerate cached zsh completions into `~/.cache/zsh-completions/`
 - `make help` - Show available commands
 - `stow <package>` - Stow individual package (e.g., `stow nvim`, `stow alacritty`)
 
@@ -60,6 +61,40 @@ The git package uses an include pattern to separate sensitive data:
   [user]
     signingkey = your-ssh-key-here
   ```
+
+### Zsh Plugin and Prompt Architecture
+
+The zsh package uses [antidote](https://getantidote.github.io/) for plugin management and [starship](https://starship.rs/) for the prompt (replacing oh-my-zsh + powerlevel10k; see commit history for rationale).
+
+**File layout**
+- `zsh/.zshrc` — main config. Load order matters: `fpath` → `compinit` → **`antidote load`** → paths → tool integrations → aliases → prompt → keybindings. Antidote is loaded early so `_evalcache` is available for the sections that follow.
+- `zsh/.zsh/plugins.txt` — antidote plugin list, one `<user>/<repo>` per line. Committed. Current order:
+  1. `mroth/evalcache` — must come first so `_evalcache` is defined before anything calls it
+  2. `zsh-users/zsh-autosuggestions`
+  3. `zsh-users/zsh-syntax-highlighting` — must be last so it wraps all previously-registered widgets
+- `zsh/.zsh/plugins.zsh` — antidote's compiled bundle, written on first shell start. Contains absolute cache paths, gitignored.
+- `zsh/.zsh/keybindings.zsh` — custom ZLE bindings (e.g., prefix-matched history search on arrow keys).
+- `zsh/.zsh/functions/` and `zsh/.zsh/completions/` — custom shell functions and completions committed to the repo.
+- `~/.cache/zsh-completions/` — tool-generated completions from `kubectl`, `helm`, `gh`, `docker`, `minikube`. Regenerate with `make completions` after upgrading any of those tools. Not committed (tool-version-specific).
+
+**Startup optimizations (Tier 1 / Tier 2)**
+
+The zshrc uses several idiomatic techniques to keep steady-state startup near ~200ms:
+
+1. **`_evalcache` (from `mroth/evalcache`)** wraps every subprocess-based init:
+   ```zsh
+   _evalcache starship init zsh
+   _evalcache zoxide init zsh
+   _evalcache fzf --zsh
+   _evalcache mise activate zsh --shims
+   ```
+   The cache lives in `~/.zsh-evalcache/`, keyed by the binary's mtime — upgrading the tool (e.g., `brew upgrade starship`) invalidates and regenerates automatically. First shell after an upgrade pays the subprocess cost once.
+
+2. **mise runs in `--shims` mode**, which adds `~/.local/share/mise/shims` to PATH but skips the `chpwd` hook. Tool versions still resolve per-directory via the shims reading `mise.toml`/`.tool-versions` at invocation. **Tradeoff**: mise's `[env]` per-project env-var injection is not applied — if you add a project that needs it, switch that project's block out or revert to full `mise activate zsh`.
+
+3. **`compinit` skips the audit on fresh zcompdumps.** The full security audit (`compaudit`) only runs when `~/.zcompdump` is older than 24 hours; otherwise `compinit -C` is used. This saves ~25ms per shell start.
+
+4. **No subprocess paths in PATH exports.** `$(go env GOPATH)/bin` was replaced with the hardcoded default `$HOME/go/bin`; `$(/usr/libexec/java_home)` was removed entirely along with Java's openjdk PATH entry (re-add when needed).
 
 ### jj Configuration Security
 

@@ -46,3 +46,4 @@ quit-after-last-window-closed = true
 font-feature = -kern,+liga,+clig
 font-thicken = true
 
+macos-option-as-alt = true

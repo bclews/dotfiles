@@ -71,11 +71,28 @@ make stow
 make unstow
 ```
 
+- **Regenerate cached zsh completions** (after upgrading kubectl, helm, gh, docker, or minikube):
+
+```sh
+make completions
+```
+
 - **Show help message**:
 
 ```sh
 make help
 ```
+
+## Zsh Startup Caches
+
+Subprocess-based shell inits (`starship`, `zoxide`, `fzf`, `mise`) are wrapped in `_evalcache` (from the [mroth/evalcache](https://github.com/mroth/evalcache) antidote plugin) so their output is cached to `~/.zsh-evalcache/` rather than regenerated on every shell start.
+
+The cache is keyed by each tool binary's modification time, which means:
+
+- **After `brew upgrade` of any wrapped tool**, the next shell pays the subprocess cost once while the cache refreshes — expect a one-time startup blip. Every shell after that is fast again.
+- **To force a full refresh manually**, run `rm -rf ~/.zsh-evalcache`.
+
+Tool-generated completions (`kubectl`, `helm`, `gh`, `docker`, `minikube`) live in a separate cache at `~/.cache/zsh-completions/` and are regenerated manually via `make completions`.
 
 ## Git Configuration Security
 
