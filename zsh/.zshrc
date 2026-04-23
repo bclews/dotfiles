@@ -17,22 +17,41 @@ fpath=(
 autoload -Uz git-aliases
 
 # --- Completion ---
+# compaudit is slow (~25ms). Run a full compinit only if the zcompdump is
+# older than 24h; otherwise skip the audit with -C.
 zstyle ':completion:*' menu select
 autoload -Uz compinit
-compinit
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+# --- Plugins ---
+# Load antidote early so `_evalcache` (mroth/evalcache) is available for the
+# tool integrations below. Order in plugins.txt matters:
+#   evalcache           — must come first
+#   zsh-autosuggestions — widget-registering; before syntax-highlighting
+#   zsh-syntax-highlighting — must be last
+export ZSH_AUTOSUGGEST_DEBOUNCE_TIME=50
+export ZSH_AUTOSUGGEST_USE_ASYNC="true"
+source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
+antidote load ~/.zsh/plugins.txt
 
 # --- Paths ---
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
-export JAVA_HOME=$(/usr/libexec/java_home)
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.cargo/bin"
+export PATH="$PATH:$HOME/go/bin"
 
-# --- Version managers ---
-eval "$(mise activate zsh)"
-export PATH="$PATH:$(go env GOPATH)/bin"
+# --- Version manager ---
+# `--shims` is dramatically faster than full activation: it only adds the
+# shim dir to PATH, with no chpwd hook. Tool version resolution still works
+# per-directory via shims reading mise.toml/.tool-versions at invocation.
+# Tradeoff: mise's `[env]` per-project env-var injection does not apply.
+_evalcache mise activate zsh --shims
 
 # --- Terminal ---
 export TERM=ghostty
@@ -44,9 +63,9 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always --level=2 {}'"
-source <(fzf --zsh)
+_evalcache fzf --zsh
 
-eval "$(zoxide init zsh)"
+_evalcache zoxide init zsh
 
 # Colorized man pages via bat
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
@@ -65,15 +84,7 @@ alias ltree="eza --tree --level=2 --icons --git"
 alias ol="ollama run llama3.1"
 
 # --- Prompt ---
-eval "$(starship init zsh)"
-
-# --- Plugins ---
-# Antidote loads plugins in the order listed in plugins.txt.
-# zsh-syntax-highlighting must load last; keep it at the end of that file.
-export ZSH_AUTOSUGGEST_DEBOUNCE_TIME=50
-export ZSH_AUTOSUGGEST_USE_ASYNC="true"
-source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
-antidote load ~/.zsh/plugins.txt
+_evalcache starship init zsh
 
 # --- Key bindings ---
 source ~/.zsh/keybindings.zsh
