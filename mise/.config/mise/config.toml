@@ -1,0 +1,8 @@
+[tools]
+go = "1.22.4"
+python = "3.11.0"
+ruby = "3.4.2"
+rust = "latest"
+
+[settings]
+idiomatic_version_file_enable_tools = ["ruby"]
