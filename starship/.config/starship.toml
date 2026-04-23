@@ -1,3 +1,10 @@
 # Starship prompt configuration.
-# Starting with defaults. Run `starship preset -l` to browse presets,
-# `starship explain` to inspect module timing, and `starship config` to edit.
+# Run `starship preset -l` to browse presets, `starship explain` to inspect
+# module timing, and `starship config` to edit.
+
+# Raise the per-command timeout; the default 500ms occasionally trips on
+# larger repos where `git status` runs long.
+command_timeout = 1000
+
+[gcloud]
+disabled = true
