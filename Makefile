@@ -12,7 +12,7 @@ stow:
 # Unstow all configuration files
 unstow:
 	@for config in $(shell find . -mindepth 1 -maxdepth 1 -type d ! -name '.git' ! -name '@notes' -exec basename {} \;); do \
-    stow $$config; \
+		stow -D $$config; \
 	done
 	@echo "All configurations unstowed."
 
