@@ -1,2 +1,4 @@
 .DS_Store
 .gitconfig.local
+# antidote compiled plugin bundle (contains absolute local paths)
+zsh/.zsh/plugins.zsh

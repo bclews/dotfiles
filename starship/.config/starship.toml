@@ -1,0 +1,3 @@
+# Starship prompt configuration.
+# Starting with defaults. Run `starship preset -l` to browse presets,
+# `starship explain` to inspect module timing, and `starship config` to edit.
