@@ -71,6 +71,12 @@ make stow
 make unstow
 ```
 
+- **Regenerate cached zsh completions** (after upgrading kubectl, helm, gh, docker, or minikube):
+
+```sh
+make completions
+```
+
 - **Show help message**:
 
 ```sh
