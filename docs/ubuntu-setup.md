@@ -48,7 +48,7 @@ Pinned versions, downloaded from each project's official release page into `/usr
 | `starship`  | 1.25.0   | Per-asset `.sha256` companion              |
 | `fzf`       | 0.68.0   | Combined `fzf_0.68.0_checksums.txt`        |
 | `neovim`    | 0.11.2   | Combined `shasum.txt`                      |
-| `lazygit`   | 0.48.2   | Combined `checksums.txt`                   |
+| `lazygit`   | 0.61.1   | Combined `checksums.txt`                   |
 | `zoxide`    | 0.9.9    | None published — HTTPS-only (installed as `.deb`) |
 | `eza`       | 0.23.4   | None published — HTTPS-only                |
 
