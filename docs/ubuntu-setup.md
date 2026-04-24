@@ -41,7 +41,7 @@ Each keyring is fetched over HTTPS, dearmored with `gpg`, and referenced from th
 
 ### Binaries from GitHub releases
 
-Pinned versions, downloaded from each project's official release page into `~/.local/bin/`. SHA256 verification is used where the upstream publishes a checksum file:
+Pinned versions, downloaded from each project's official release page into `/usr/local/bin/` (system-wide, root-owned). SHA256 verification is used where the upstream publishes a checksum file:
 
 | Tool        | Version  | Checksum source                            |
 |-------------|----------|--------------------------------------------|
@@ -63,10 +63,10 @@ Ubuntu renames two binaries that the dotfiles call by their upstream names:
 
 | Upstream | Ubuntu binary | Fix                                       |
 |----------|---------------|-------------------------------------------|
-| `bat`    | `batcat`      | Symlinked to `~/.local/bin/bat`           |
-| `fd`     | `fdfind`      | Symlinked to `~/.local/bin/fd`            |
+| `bat`    | `batcat`      | Symlinked to `/usr/local/bin/bat`         |
+| `fd`     | `fdfind`      | Symlinked to `/usr/local/bin/fd`          |
 
-`~/.local/bin` is prepended to `PATH` in `.zshrc`, so both resolve normally once you start zsh.
+Created system-wide during the system phase, so all users on the VM see `bat`/`fd` without per-user setup.
 
 ## Post-install checklist
 
@@ -96,6 +96,52 @@ gh auth login
 - **`make completions`** requires `kubectl`, `helm`, `gh`, `docker`, and `minikube` to be installed. The bootstrap only installs `gh`; add the others yourself if you need their completions regenerated.
 - **`mise` is installed but not used by the bootstrap itself.** It's available for your project-level tool version management (see `mise.toml`/`.tool-versions`). The bootstrap deliberately pins user tools to specific releases rather than using `mise` for install, so the setup is reproducible across machines regardless of registry availability.
 
+## Multi-user deploy
+
+Shared VMs often have more than one user that wants the dotfiles — your personal account, service accounts that you `sudo su -` into, and `root` (via `sudo -i`). `bootstrap.sh` splits into two phases so each user only does the work they need.
+
+| Phase  | Flag              | Requires sudo? | What it does                                                                      |
+|--------|-------------------|:--------------:|-----------------------------------------------------------------------------------|
+| system | `--system-only`   |      yes       | apt base, git-core PPA, signed repos for `gh`/`mise`, tool binaries to `/usr/local/bin`, `nvim` to `/opt/nvim` |
+| user   | `--user-only`     |       no       | antidote clone to `~/.antidote`, `make stow`                                      |
+| both   | (default)         |      yes       | system phase then user phase                                                      |
+
+The system phase runs exactly once per VM and makes all tool binaries available system-wide under `/usr/local/bin`, so subsequent per-user installs are fast and sudo-free.
+
+### Typical sequence on a fresh VM
+
+```sh
+# 1. As your personal user (with sudo):
+git clone https://github.com/bclews/dotfiles.git ~/dotfiles
+cd ~/dotfiles && ./bootstrap.sh        # system + user for you
+
+# 2. As a service account without sudo (e.g. sa-rema):
+sudo su - sa-rema
+git clone https://github.com/bclews/dotfiles.git ~/dotfiles
+cd ~/dotfiles && ./bootstrap.sh --user-only
+
+# 3. As root (so `sudo -i` sessions feel like your normal shell):
+sudo -i
+git clone https://github.com/bclews/dotfiles.git ~/dotfiles
+cd ~/dotfiles && SKIP_LOCAL=git ./bootstrap.sh --user-only
+```
+
+`SKIP_LOCAL=git` on root skips the gitconfig symlink — you don't want root accidentally committing with your signing key or identity.
+
+### What each user ends up with
+
+- Their own `~/.antidote/` clone (~70KB)
+- Their own `~/.zsh-evalcache/` (first shell pays the subprocess cost, then cached)
+- Their own `~/.cache/antidote/` (plugin cache)
+- Stowed symlinks in their `$HOME/` pointing into their personal `~/dotfiles/`
+
+Everyone shares the `/usr/local/bin` tool binaries — one update at the system phase lifts all users onto the new version.
+
+### Notes
+
+- If the service account's `$HOME` is on a different filesystem with `noexec`, the `~/.antidote` clone still works since antidote is source, not binaries.
+- If you `git pull` the dotfiles, each user pulls independently in their own `~/dotfiles` clone. If that's too much coordination, consider cloning once to `/opt/dotfiles` with group-read permissions and having users `stow` against it — but that requires a Makefile `--target=$HOME` patch; not in scope today.
+
 ## Skipping packages on a specific machine
 
 If there's a package you don't want on this host (say, you don't use `1Password`):
@@ -112,9 +158,8 @@ If you want to cherry-pick rather than run the whole script:
 
 ```sh
 sudo apt install -y zsh stow git make curl bat fd-find ripgrep
-mkdir -p ~/.local/bin
-ln -s /usr/bin/batcat ~/.local/bin/bat
-ln -s /usr/bin/fdfind ~/.local/bin/fd
+sudo ln -s /usr/bin/batcat /usr/local/bin/bat
+sudo ln -s /usr/bin/fdfind /usr/local/bin/fd
 
 git clone --depth=1 --branch=v1.9.7 https://github.com/mattmc3/antidote.git ~/.antidote
 

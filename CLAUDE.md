@@ -12,6 +12,8 @@ Supported platforms: macOS and Ubuntu 22.04+. The `bootstrap.sh` script at the r
 
 ### Bootstrap
 - `./bootstrap.sh` - Detect OS, install all prerequisites, and stow. Idempotent.
+- `./bootstrap.sh --system-only` - Ubuntu only: apt/PPA/signed-repo/tool-binary installs (requires sudo, runs once per VM)
+- `./bootstrap.sh --user-only` - Ubuntu only: antidote clone + `make stow` (no sudo, safe for service accounts like sa-rema)
 
 ### GNU Stow Operations
 - `make stow` or `make` - Stow all configurations for the current OS (creates symlinks)

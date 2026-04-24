@@ -46,7 +46,14 @@ The script is idempotent — safe to re-run after adding packages or bumping too
 | User tools          | `brew install` formulae list       | GitHub release tarballs with SHA256 verification into `~/.local/bin`|
 | Stow configs        | `make stow` (skips none)           | `make stow` (skips `hammerspoon`)                                   |
 
-See `docs/ubuntu-setup.md` for the full Ubuntu walkthrough, including gotchas and manual-install alternatives.
+See `docs/ubuntu-setup.md` for the full Ubuntu walkthrough, including gotchas, manual-install alternatives, and the multi-user deploy flow (primary user + service accounts + root via `sudo -i`).
+
+### Flags
+
+- `./bootstrap.sh` — default, runs system + user phases
+- `./bootstrap.sh --system-only` — apt/PPA/signed-repo/tool-binary installs (requires sudo, runs once per VM)
+- `./bootstrap.sh --user-only` — antidote clone + `make stow` (no sudo, safe for service accounts)
+- `./bootstrap.sh --help` — full usage
 
 ### Post-bootstrap steps
 

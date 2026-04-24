@@ -2,13 +2,28 @@
 # Bootstrap this dotfiles repo on a fresh macOS or Ubuntu machine.
 # Idempotent — safe to re-run.
 #
+# On Ubuntu the script has two phases:
+#   - system phase: apt installs, signed upstream repos, and tool binaries
+#                   installed to /usr/local/bin. Requires sudo. Run once
+#                   per VM by a user with sudo.
+#   - user phase:   antidote clone to ~/.antidote and `make stow`. No sudo.
+#                   Run by every user who wants the config — typically
+#                   your personal user, sa-rema (service account), and
+#                   root (for `sudo -i` sessions).
+# Flags:
+#   --system-only   Run system phase only, skip user phase. Useful when
+#                   provisioning the VM for users who will each self-apply.
+#   --user-only     Run user phase only, skip system phase. Required for
+#                   users without sudo (e.g. sa-rema).
+#   default         Run both phases (single-user macOS/Ubuntu install).
+#
 # Security posture:
 #   - apt packages come from Ubuntu's signed main/universe plus official
 #     upstream apt repos for gh and mise (both GPG-signed keyrings).
 #   - antidote is pinned to a release tag and cloned over HTTPS.
-#   - User tools (starship, zoxide, fzf, eza, neovim) are downloaded from
-#     their official GitHub releases and verified against the companion
-#     SHA256 file published alongside each release.
+#   - Tool binaries (starship, zoxide, fzf, eza, neovim) are downloaded
+#     from their official GitHub releases and verified against the
+#     companion SHA256 file published alongside each release.
 #   - No `curl | bash` pipelines.
 
 set -euo pipefail
@@ -18,11 +33,31 @@ warn() { printf '\033[1;33m==>\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m==>\033[0m %s\n' "$*" >&2; exit 1; }
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOCAL_BIN="$HOME/.local/bin"
-mkdir -p "$LOCAL_BIN"
-# Ensure our own PATH can see things we've installed or may install, so the
-# per-tool `command -v` idempotency checks and later shims resolve correctly.
-export PATH="$LOCAL_BIN:$PATH"
+
+# Binaries from this script go system-wide on Ubuntu so each VM only pays
+# for one download per tool regardless of how many users apply the dotfiles.
+SYSTEM_BIN="/usr/local/bin"
+NVIM_PREFIX="/opt/nvim"
+
+RUN_SYSTEM=1
+RUN_USER=1
+
+print_help() {
+  # Print the top-of-file comment block up to (but not including) the
+  # "Security posture" section.
+  sed -n '2,/^# Security posture/p' "${BASH_SOURCE[0]}" | \
+    sed '$d; s/^# \{0,1\}//'
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --system-only) RUN_USER=0 ;;
+    --user-only)   RUN_SYSTEM=0 ;;
+    -h|--help)     print_help; exit 0 ;;
+    *)             die "Unknown flag: $1 (try --help)" ;;
+  esac
+  shift
+done
 
 # Pinned versions — bump these periodically and re-run.
 ANTIDOTE_TAG="v1.9.7"
@@ -88,13 +123,14 @@ install_starship() {
   if command -v starship >/dev/null && [[ "$(starship --version | awk '{print $2}')" == "$STARSHIP_VERSION" ]]; then
     log "starship $STARSHIP_VERSION already installed"; return
   fi
-  log "Installing starship $STARSHIP_VERSION"
+  log "Installing starship $STARSHIP_VERSION to $SYSTEM_BIN"
   local arch; arch=$(arch_tag gnu)
   local asset="starship-${arch}-unknown-linux-musl.tar.gz"
   local base="https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}"
   local tmp; tmp=$(mktemp -d)
   download_verify "$base/$asset" "$base/$asset.sha256" "$tmp/$asset"
-  tar -xzf "$tmp/$asset" -C "$LOCAL_BIN" starship
+  tar -xzf "$tmp/$asset" -C "$tmp"
+  sudo install -m 0755 "$tmp/starship" "$SYSTEM_BIN/starship"
   rm -rf "$tmp"
 }
 
@@ -118,13 +154,14 @@ install_fzf() {
   if command -v fzf >/dev/null && [[ "$(fzf --version | awk '{print $1}')" == "$FZF_VERSION" ]]; then
     log "fzf $FZF_VERSION already installed"; return
   fi
-  log "Installing fzf $FZF_VERSION"
+  log "Installing fzf $FZF_VERSION to $SYSTEM_BIN"
   local arch; arch=$(arch_tag go)
   local asset="fzf-${FZF_VERSION}-linux_${arch}.tar.gz"
   local base="https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}"
   local tmp; tmp=$(mktemp -d)
   download_verify "$base/$asset" "$base/fzf_${FZF_VERSION}_checksums.txt" "$tmp/$asset" "$asset"
-  tar -xzf "$tmp/$asset" -C "$LOCAL_BIN" fzf
+  tar -xzf "$tmp/$asset" -C "$tmp"
+  sudo install -m 0755 "$tmp/fzf" "$SYSTEM_BIN/fzf"
   rm -rf "$tmp"
 }
 
@@ -132,14 +169,14 @@ install_eza() {
   if command -v eza >/dev/null && [[ "$(eza --version | awk 'NR==2 {print $1}' | sed 's/^v//')" == "$EZA_VERSION" ]]; then
     log "eza $EZA_VERSION already installed"; return
   fi
-  log "Installing eza $EZA_VERSION (HTTPS-only; upstream does not publish SHA256SUMS)"
+  log "Installing eza $EZA_VERSION to $SYSTEM_BIN (HTTPS-only; upstream does not publish SHA256SUMS)"
   local arch; arch=$(arch_tag gnu)
   local asset="eza_${arch}-unknown-linux-gnu.tar.gz"
   local url="https://github.com/eza-community/eza/releases/download/v${EZA_VERSION}/${asset}"
   local tmp; tmp=$(mktemp -d)
   curl -fsSL -o "$tmp/$asset" "$url"
   tar -xzf "$tmp/$asset" -C "$tmp"
-  install -m 0755 "$tmp/eza" "$LOCAL_BIN/eza"
+  sudo install -m 0755 "$tmp/eza" "$SYSTEM_BIN/eza"
   rm -rf "$tmp"
 }
 
@@ -147,17 +184,16 @@ install_neovim() {
   if command -v nvim >/dev/null && nvim --version | head -1 | grep -q "$NEOVIM_VERSION"; then
     log "neovim $NEOVIM_VERSION already installed"; return
   fi
-  log "Installing neovim $NEOVIM_VERSION"
+  log "Installing neovim $NEOVIM_VERSION to $NVIM_PREFIX"
   local arch; arch=$(arch_tag nvim)
   local asset="nvim-linux-${arch}.tar.gz"
   local base="https://github.com/neovim/neovim/releases/download/v${NEOVIM_VERSION}"
   local tmp; tmp=$(mktemp -d)
   download_verify "$base/$asset" "$base/shasum.txt" "$tmp/$asset" "$asset"
-  # Extract under ~/.local/share/nvim-dist and symlink the binary.
-  rm -rf "$HOME/.local/share/nvim-dist"
-  mkdir -p "$HOME/.local/share/nvim-dist"
-  tar -xzf "$tmp/$asset" --strip-components=1 -C "$HOME/.local/share/nvim-dist"
-  ln -sf "$HOME/.local/share/nvim-dist/bin/nvim" "$LOCAL_BIN/nvim"
+  sudo rm -rf "$NVIM_PREFIX"
+  sudo mkdir -p "$NVIM_PREFIX"
+  sudo tar -xzf "$tmp/$asset" --strip-components=1 -C "$NVIM_PREFIX"
+  sudo ln -sf "$NVIM_PREFIX/bin/nvim" "$SYSTEM_BIN/nvim"
   rm -rf "$tmp"
 }
 
@@ -209,7 +245,7 @@ apt_add_signed_repo() {
   echo "$repo_line" | sudo tee "$list" >/dev/null
 }
 
-bootstrap_ubuntu() {
+system_ubuntu() {
   log "Installing apt base packages"
   sudo apt-get update -qq
   sudo apt-get install -y --no-install-recommends \
@@ -227,12 +263,12 @@ bootstrap_ubuntu() {
   fi
   sudo apt-get install -y --no-install-recommends git
 
-  # Ubuntu renames these binaries. Expose canonical names via ~/.local/bin,
-  # which .zshrc already has on PATH.
-  [[ -x /usr/bin/batcat && ! -e "$LOCAL_BIN/bat" ]] \
-    && ln -s /usr/bin/batcat "$LOCAL_BIN/bat"
-  [[ -x /usr/bin/fdfind && ! -e "$LOCAL_BIN/fd" ]] \
-    && ln -s /usr/bin/fdfind "$LOCAL_BIN/fd"
+  # Ubuntu renames these binaries. Expose canonical names via /usr/local/bin
+  # so every user on the VM sees `bat`/`fd` without needing per-user symlinks.
+  [[ -x /usr/bin/batcat && ! -e "$SYSTEM_BIN/bat" ]] \
+    && sudo ln -s /usr/bin/batcat "$SYSTEM_BIN/bat"
+  [[ -x /usr/bin/fdfind && ! -e "$SYSTEM_BIN/fd" ]] \
+    && sudo ln -s /usr/bin/fdfind "$SYSTEM_BIN/fd"
 
   local arch; arch="$(dpkg --print-architecture)"
   apt_add_signed_repo githubcli \
@@ -244,14 +280,17 @@ bootstrap_ubuntu() {
   sudo apt-get update -qq
   sudo apt-get install -y --no-install-recommends gh mise
 
-  # User tools from pinned GitHub releases with SHA256 verification.
+  # Tool binaries from pinned GitHub releases, installed system-wide.
   install_starship
   install_zoxide
   install_fzf
   install_eza
   install_neovim
+}
 
-  # antidote on Linux: no apt package, clone the repo pinned to a release.
+user_ubuntu() {
+  # Everything here must work without sudo so that service accounts like
+  # sa-rema (no sudo) can self-apply the config.
   install_antidote_linux
 }
 
@@ -285,6 +324,10 @@ EOF
 
         chsh -s "\$(command -v zsh)"
 
+  - Multi-user deploy on this VM:
+      sudo su - sa-rema   && git clone <repo> ~/dotfiles && ~/dotfiles/bootstrap.sh --user-only
+      sudo -i             && git clone <repo> ~/dotfiles && SKIP_LOCAL=git ~/dotfiles/bootstrap.sh --user-only
+
 EOF
       ;;
   esac
@@ -300,15 +343,44 @@ EOF
 EOF
 }
 
+print_system_only_postinstall() {
+  local b r; b=$(tput bold 2>/dev/null || true); r=$(tput sgr0 2>/dev/null || true)
+  cat <<EOF
+
+${b}System phase complete${r}
+  - Tool binaries are in $SYSTEM_BIN (system-wide); nvim extracted to $NVIM_PREFIX.
+  - Each user still needs to apply their own config:
+      ./bootstrap.sh --user-only
+
+EOF
+}
+
 main() {
   local os; os=$(detect_os)
   log "Detected OS: $os"
+
   case "$os" in
-    macos)  bootstrap_macos ;;
-    ubuntu) bootstrap_ubuntu ;;
+    macos)
+      # macOS uses brew for everything; the system/user split doesn't map cleanly.
+      # Flags are accepted but effectively run the full macOS flow either way.
+      bootstrap_macos
+      apply_dotfiles
+      print_postinstall "$os"
+      ;;
+    ubuntu)
+      if (( RUN_SYSTEM )); then
+        system_ubuntu
+      fi
+      if (( RUN_USER )); then
+        user_ubuntu
+        apply_dotfiles
+        print_postinstall "$os"
+      else
+        print_system_only_postinstall
+      fi
+      ;;
   esac
-  apply_dotfiles
-  print_postinstall "$os"
+
   log "Bootstrap complete."
 }
 
