@@ -301,6 +301,7 @@ system_ubuntu() {
   install_zoxide
   install_fzf
   install_eza
+  install_lazygit
   install_neovim
 }
 
