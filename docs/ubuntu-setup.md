@@ -24,7 +24,7 @@ Re-running is safe; every install step checks for the already-installed version 
 
 ### apt base packages (from Ubuntu's signed archive)
 
-`zsh`, `stow`, `make`, `gcc`, `curl`, `ca-certificates`, `gpg`, `software-properties-common`, `bat`, `fd-find`, `ripgrep`, `python3-pip`, `python3-venv`.
+`zsh`, `stow`, `make`, `build-essential`, `curl`, `ca-certificates`, `gpg`, `software-properties-common`, `bat`, `fd-find`, `ripgrep`, `python3-pip`, `python3-venv`, `python3-pynvim`.
 
 ### git-core PPA (signed, maintained by the git project)
 

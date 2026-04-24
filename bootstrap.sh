@@ -181,7 +181,7 @@ install_eza() {
 }
 
 install_lazygit() {
-  if command -v lazygit >/dev/null && [[ "$(lazygit --version | awk '{print $4}' | sed 's/v//' | sed 's/,//')" == "$LAZYGIT_VERSION" ]]; then
+  if command -v lazygit >/dev/null && [[ "$(lazygit --version | grep -oE 'version=[0-9.]+' | cut -d= -f2)" == "$LAZYGIT_VERSION" ]]; then
     log "lazygit $LAZYGIT_VERSION already installed"; return
   fi
   log "Installing lazygit $LAZYGIT_VERSION to $SYSTEM_BIN"
@@ -264,10 +264,10 @@ system_ubuntu() {
   log "Installing apt base packages"
   sudo apt-get update -qq
   sudo apt-get install -y --no-install-recommends \
-    zsh stow make gcc curl ca-certificates gpg \
+    zsh stow make build-essential curl ca-certificates gpg \
     software-properties-common \
     bat fd-find ripgrep \
-    python3-pip python3-venv
+    python3-pip python3-venv python3-pynvim
 
   # Ubuntu 22.04 ships git 2.34, but the stowed .gitconfig uses
   # `merge.conflictstyle = zdiff3` (added in 2.35). Pull git from the
