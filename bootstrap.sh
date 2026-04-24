@@ -180,6 +180,21 @@ install_eza() {
   rm -rf "$tmp"
 }
 
+install_lazygit() {
+  if command -v lazygit >/dev/null && [[ "$(lazygit --version | awk '{print $4}' | sed 's/v//' | sed 's/,//')" == "$LAZYGIT_VERSION" ]]; then
+    log "lazygit $LAZYGIT_VERSION already installed"; return
+  fi
+  log "Installing lazygit $LAZYGIT_VERSION to $SYSTEM_BIN"
+  local arch; arch=$(arch_tag nvim)
+  local asset="lazygit_${LAZYGIT_VERSION}_Linux_${arch}.tar.gz"
+  local base="https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}"
+  local tmp; tmp=$(mktemp -d)
+  download_verify "$base/$asset" "$base/checksums.txt" "$tmp/$asset" "$asset"
+  tar -xzf "$tmp/$asset" -C "$tmp" lazygit
+  sudo install -m 0755 "$tmp/lazygit" "$SYSTEM_BIN/lazygit"
+  rm -rf "$tmp"
+}
+
 install_neovim() {
   if command -v nvim >/dev/null && nvim --version | head -1 | grep -q "$NEOVIM_VERSION"; then
     log "neovim $NEOVIM_VERSION already installed"; return
@@ -249,9 +264,10 @@ system_ubuntu() {
   log "Installing apt base packages"
   sudo apt-get update -qq
   sudo apt-get install -y --no-install-recommends \
-    zsh stow make curl ca-certificates gpg \
+    zsh stow make gcc curl ca-certificates gpg \
     software-properties-common \
-    bat fd-find ripgrep
+    bat fd-find ripgrep \
+    python3-pip python3-venv
 
   # Ubuntu 22.04 ships git 2.34, but the stowed .gitconfig uses
   # `merge.conflictstyle = zdiff3` (added in 2.35). Pull git from the

@@ -14,7 +14,7 @@ fpath=(
   ~/.zsh/functions
   $fpath
 )
-autoload -Uz git-aliases take
+autoload -Uz git-aliases take ssh-terminfo
 
 # --- Completion ---
 # compaudit is slow (~25ms). Run a full compinit only if the zcompdump is

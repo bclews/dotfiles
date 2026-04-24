@@ -24,7 +24,7 @@ Re-running is safe; every install step checks for the already-installed version 
 
 ### apt base packages (from Ubuntu's signed archive)
 
-`zsh`, `stow`, `make`, `curl`, `ca-certificates`, `gpg`, `software-properties-common`, `bat`, `fd-find`, `ripgrep`.
+`zsh`, `stow`, `make`, `gcc`, `curl`, `ca-certificates`, `gpg`, `software-properties-common`, `bat`, `fd-find`, `ripgrep`, `python3-pip`, `python3-venv`.
 
 ### git-core PPA (signed, maintained by the git project)
 
@@ -48,6 +48,7 @@ Pinned versions, downloaded from each project's official release page into `/usr
 | `starship`  | 1.25.0   | Per-asset `.sha256` companion              |
 | `fzf`       | 0.68.0   | Combined `fzf_0.68.0_checksums.txt`        |
 | `neovim`    | 0.11.2   | Combined `shasum.txt`                      |
+| `lazygit`   | 0.48.2   | Combined `checksums.txt`                   |
 | `zoxide`    | 0.9.9    | None published — HTTPS-only (installed as `.deb`) |
 | `eza`       | 0.23.4   | None published — HTTPS-only                |
 
@@ -91,8 +92,33 @@ gh auth login
 
 ## Known gotchas
 
-- **`TERM=ghostty`**: the `.zshrc` only exports `TERM=ghostty` when the ghostty terminfo entry is present. On a headless Ubuntu box without ghostty, `TERM` stays whatever your terminal set it to. If you SSH in from a Ghostty terminal on macOS and want full rendering, install the terminfo entry manually with `tic`.
+- **Garbled line editor over SSH (`TERM=ghostty` mismatch)**: if you SSH in from a Ghostty terminal on macOS, your local `TERM=ghostty` gets forwarded over SSH. The remote Ubuntu box has no `ghostty` terminfo entry, so zsh's line editor redraws incorrectly — you see doubled characters, stale input, or "unknown terminal" errors (e.g. typing `ls /home/sa-rema` renders as `ls /home/sa-remeaaa--rreem`). The `.zshrc` guard only stops *this* machine from *exporting* `TERM=ghostty`; it doesn't fix what the SSH client forwards in.
+
+  Fix once per `<user, host>` pair by installing your local terminfo on the remote (no sudo needed — it lands in `~/.terminfo`):
+
+  ```sh
+  # From your Mac, using the ssh-terminfo zsh function (autoloaded from this repo):
+  ssh-terminfo gen3-cle126b
+  ssh-terminfo sa-rema@gen3-cle126b
+  ssh-terminfo root@gen3-cle126b  # requires root ssh, usually not configured — do it after sudo -i
+
+  # Equivalent raw command if you prefer:
+  infocmp -x "$TERM" | ssh gen3-cle126b -- tic -x -
+  ```
+
+  Alternative: set `TERM=xterm-256color` in your `~/.ssh/config` for that host to sidestep the issue entirely (at the cost of losing Ghostty-specific rendering inside the SSH session).
+
 - **`hammerspoon/`** is macOS-only and is skipped by the Makefile on Linux — it will not be stowed.
+- **Pre-existing home-dir files block stow**: if a user already has a `~/.zshrc`, `~/.gitconfig`, or `~/.config/nvim` from a previous shell install or `/etc/skel`, `make stow` aborts with a conflict warning. Move the offender aside and re-stow:
+
+  ```sh
+  for f in .zshrc .zshenv .zprofile .gitconfig .config/nvim; do
+    [[ -e ~/$f && ! -L ~/$f ]] && mv -v ~/$f ~/$f.pre-dotfiles
+  done
+  cd ~/dotfiles && make stow
+  ```
+
+  Do not use `stow --adopt` — it imports the user's existing file *into the repo*, which is the opposite of what you want.
 - **`make completions`** requires `kubectl`, `helm`, `gh`, `docker`, and `minikube` to be installed. The bootstrap only installs `gh`; add the others yourself if you need their completions regenerated.
 - **`mise` is installed but not used by the bootstrap itself.** It's available for your project-level tool version management (see `mise.toml`/`.tool-versions`). The bootstrap deliberately pins user tools to specific releases rather than using `mise` for install, so the setup is reproducible across machines regardless of registry availability.
 

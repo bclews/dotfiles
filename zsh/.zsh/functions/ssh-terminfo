@@ -1,0 +1,14 @@
+# ssh-terminfo <host> — install the current TERM's terminfo entry on a
+# remote host via SSH. Fixes "unknown terminal" errors and garbled line
+# editors (doubled/overwritten characters) when TERM is known locally
+# but not on the remote — e.g., SSHing from Ghostty to an Ubuntu box
+# that doesn't ship the ghostty terminfo.
+#
+# No sudo needed on the remote: `tic -x -` installs under ~/.terminfo.
+# The host argument is passed straight to ssh, so user@host works.
+#
+# Usage: ssh-terminfo gen3-cle126b
+#        ssh-terminfo sa-rema@gen3-cle126b
+
+[[ -n "$1" ]] || { echo "usage: ssh-terminfo <[user@]host>" >&2; return 1; }
+infocmp -x "$TERM" | ssh "$1" -- tic -x -
