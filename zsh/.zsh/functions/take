@@ -1,0 +1,5 @@
+# --- Create one or more directories and cd into the last one ---
+# Replacement for the oh-my-zsh `take` function lost in the antidote migration.
+take() {
+  mkdir -p -- "$@" && cd -- "${@: -1}"
+}
