@@ -6,14 +6,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a dotfiles repository organized for use with GNU Stow, a symlink manager. Each top-level directory represents a package containing configuration files for a specific application, with subdirectories that mirror the target filesystem structure.
 
+Supported platforms: macOS and Ubuntu 22.04+. The `bootstrap.sh` script at the repo root installs prerequisites on either OS and then runs `make stow`. See `docs/ubuntu-setup.md` for Linux-specific notes.
+
 ## Key Commands
 
+### Bootstrap
+- `./bootstrap.sh` - Detect OS, install all prerequisites, and stow. Idempotent.
+
 ### GNU Stow Operations
-- `make stow` or `make` - Stow all configurations (creates symlinks)
-- `make unstow` - Unstow all configurations (removes symlinks)
+- `make stow` or `make` - Stow all configurations for the current OS (creates symlinks)
+- `make unstow` - Unstow all configurations for the current OS (removes symlinks)
+- `make list` - Show which packages would be stowed (useful for debugging OS detection)
 - `make completions` - Regenerate cached zsh completions into `~/.cache/zsh-completions/`
 - `make help` - Show available commands
 - `stow <package>` - Stow individual package (e.g., `stow nvim`, `stow alacritty`)
+- `SKIP_LOCAL="pkg1 pkg2" make` - Skip specific packages on this machine regardless of OS
 
 ### Individual Package Management
 To work with specific configurations:
@@ -42,12 +49,13 @@ Files are organized to match their target locations when stowed:
 - `alacritty/.config/alacritty/` → `~/.config/alacritty/`
 
 ### Excluded Directories
-The Makefile automatically excludes `.git` and `@notes` directories from stowing operations.
+The Makefile uses `$(wildcard */)` to enumerate packages, which naturally skips dotdirs (`.git`, `.claude`). The `@notes` directory is explicitly filtered out. A per-OS `SKIP_OS` list excludes packages that have no meaning on the target OS — currently `hammerspoon` on Linux, nothing on macOS.
 
 ## Development Notes
 
 - The repository uses GNU Stow's directory structure convention
 - Configuration changes should be made within the appropriate package directory
+- The `bootstrap.sh` script pins tool versions and verifies SHA256 checksums where upstream publishes them; bump the version constants at the top of the script periodically
 - The Neovim configuration is based on LazyVim and includes a workaround for LSP file watching issues
 - No traditional build/test/lint commands as this is a configuration repository
 

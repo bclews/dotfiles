@@ -27,6 +27,18 @@ else
   compinit -C
 fi
 
+# --- Homebrew prefix ---
+# Detect Homebrew/Linuxbrew location so the rest of the file can reference
+# $HOMEBREW_PREFIX instead of hardcoding /opt/homebrew. `brew shellenv`
+# normally sets this, but we avoid the subprocess to keep startup fast.
+if [[ -z "$HOMEBREW_PREFIX" ]]; then
+  if [[ -d /opt/homebrew ]]; then
+    export HOMEBREW_PREFIX=/opt/homebrew
+  elif [[ -d /home/linuxbrew/.linuxbrew ]]; then
+    export HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+  fi
+fi
+
 # --- Plugins ---
 # Load antidote early so `_evalcache` (mroth/evalcache) is available for the
 # tool integrations below. Order in plugins.txt matters:
@@ -35,13 +47,20 @@ fi
 #   zsh-syntax-highlighting — must be last
 export ZSH_AUTOSUGGEST_DEBOUNCE_TIME=50
 export ZSH_AUTOSUGGEST_USE_ASYNC="true"
-source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
+if [[ -n "$HOMEBREW_PREFIX" && -f "$HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh" ]]; then
+  source "$HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh"
+elif [[ -f "$HOME/.antidote/antidote.zsh" ]]; then
+  source "$HOME/.antidote/antidote.zsh"
+fi
 antidote load ~/.zsh/plugins.txt
 
 # --- Paths ---
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
+# Postgres CLI/headers — only wired up when the brew keg is installed.
+if [[ -n "$HOMEBREW_PREFIX" && -d "$HOMEBREW_PREFIX/opt/postgresql@16" ]]; then
+  export PATH="$HOMEBREW_PREFIX/opt/postgresql@16/bin:$PATH"
+  export LDFLAGS="-L$HOMEBREW_PREFIX/opt/postgresql@16/lib"
+  export CPPFLAGS="-I$HOMEBREW_PREFIX/opt/postgresql@16/include"
+fi
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/.cargo/bin"
 export PATH="$PATH:$HOME/go/bin"
@@ -54,7 +73,9 @@ export PATH="$PATH:$HOME/go/bin"
 _evalcache mise activate zsh --shims
 
 # --- Terminal ---
-export TERM=ghostty
+# Only set TERM=ghostty if this machine actually has ghostty's terminfo
+# entry — otherwise curses-based programs will error with "unknown terminal".
+(( $+commands[infocmp] )) && infocmp ghostty &>/dev/null && export TERM=ghostty
 
 # --- Tool integrations ---
 # fzf: fd for listing (respects .gitignore, hides .git), bat/eza previews
