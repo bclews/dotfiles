@@ -187,7 +187,7 @@ install_lazygit() {
   fi
   log "Installing lazygit $LAZYGIT_VERSION to $SYSTEM_BIN"
   local arch; arch=$(arch_tag nvim)
-  local asset="lazygit_${LAZYGIT_VERSION}_Linux_${arch}.tar.gz"
+  local asset="lazygit_${LAZYGIT_VERSION}_linux_${arch}.tar.gz"
   local base="https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}"
   local tmp; tmp=$(mktemp -d)
   download_verify "$base/$asset" "$base/checksums.txt" "$tmp/$asset" "$asset"
