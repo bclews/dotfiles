@@ -270,6 +270,9 @@ system_ubuntu() {
     bat fd-find ripgrep \
     python3-pip python3-venv python3-pynvim
 
+  # Install latest pynvim via pip since the apt version is often outdated
+  pip3 install --user --upgrade pynvim
+
   # Ubuntu 22.04 ships git 2.34, but the stowed .gitconfig uses
   # `merge.conflictstyle = zdiff3` (added in 2.35). Pull git from the
   # git-core PPA (maintained by the git project, signed keyring).
