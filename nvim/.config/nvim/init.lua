@@ -1,3 +1,6 @@
+-- Fix for nvim-treesitter site directory runtimepath issue
+vim.opt.rtp:prepend(vim.fn.stdpath("data") .. "/site")
+
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
 

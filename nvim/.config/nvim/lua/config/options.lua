@@ -1,4 +1,7 @@
 -- Options are automatically loaded before lazy.nvim startup
 -- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 -- Add any additional options here
-vim.opt.rtp:prepend(vim.fn.stdpath("data") .. "/site")
+
+-- Safeguard for highlight groups to prevent Snacks/Noice from crashing
+-- when they try to inherit colors from transparent backgrounds.
+vim.api.nvim_set_hl(0, "SnacksNormal", { fg = "#c6a0f6" }) -- Use Macchiato Mauve as fallback
