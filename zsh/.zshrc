@@ -83,7 +83,7 @@ export PATH="$PATH:$HOME/go/bin"
 # breaks bootstrap.sh's pinned binaries (e.g. fzf 0.68 vs apt's 0.29).
 # Tradeoff (same as before): mise's `[env]` per-project env-var injection
 # is not applied; switch to full `mise activate zsh` if you need it.
-[[ -d "$HOME/.local/share/mise/shims" ]] && path=("$HOME/.local/share/mise/shims" $path)
+path=("$HOME/.local/share/mise/shims" $path)
 
 # --- Terminal ---
 # Only set TERM=ghostty if this machine actually has ghostty's terminfo
