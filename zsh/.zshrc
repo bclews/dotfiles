@@ -55,13 +55,14 @@ fi
 antidote load ~/.zsh/plugins.txt
 
 # --- Paths ---
-# Some shared VMs (e.g. gen3-*) ship an /etc/environment that puts /usr/local/bin
-# last, so apt-installed tools shadow the pinned binaries we install to
-# /usr/local/bin via bootstrap.sh (most painfully: an old apt fzf hides our
-# fzf 0.68, breaking `fzf --zsh`). Force /usr/local/{s,}bin to the front and
-# dedupe PATH. zsh keeps `path` and `PATH` synced.
-typeset -U path
-path=(/usr/local/bin /usr/local/sbin $path)
+# Make PATH idempotent against `exec zsh` chains and hostile inherited PATHs.
+# `typeset -U` on both the PATH scalar and the path array catches both
+# `export PATH="$PATH:..."` and `path=(...)` style assignments. The hard
+# reset to a canonical baseline guarantees /usr/local/bin wins on shared VMs
+# (e.g. gen3-*) where /etc/environment puts it last and apt's old fzf would
+# otherwise shadow bootstrap.sh's pinned fzf 0.68.
+typeset -U PATH path cdpath fpath manpath
+path=(/usr/local/bin /usr/local/sbin /usr/sbin /usr/bin /sbin /bin)
 
 # Postgres CLI/headers — only wired up when the brew keg is installed.
 if [[ -n "$HOMEBREW_PREFIX" && -d "$HOMEBREW_PREFIX/opt/postgresql@16" ]]; then
