@@ -75,11 +75,15 @@ export PATH="$PATH:$HOME/.cargo/bin"
 export PATH="$PATH:$HOME/go/bin"
 
 # --- Version manager ---
-# `--shims` is dramatically faster than full activation: it only adds the
-# shim dir to PATH, with no chpwd hook. Tool version resolution still works
-# per-directory via shims reading mise.toml/.tool-versions at invocation.
-# Tradeoff: mise's `[env]` per-project env-var injection does not apply.
-_evalcache mise activate zsh --shims
+# Shims-only mode: adding mise's shim dir to PATH is all `mise activate
+# --shims` actually does for us — tool version resolution happens at
+# invocation via the shims reading mise.toml/.tool-versions. We do it
+# manually instead of via `_evalcache mise activate` because mise activate
+# also prepends /usr/bin defensively, which shadows /usr/local/bin and
+# breaks bootstrap.sh's pinned binaries (e.g. fzf 0.68 vs apt's 0.29).
+# Tradeoff (same as before): mise's `[env]` per-project env-var injection
+# is not applied; switch to full `mise activate zsh` if you need it.
+[[ -d "$HOME/.local/share/mise/shims" ]] && path=("$HOME/.local/share/mise/shims" $path)
 
 # --- Terminal ---
 # Only set TERM=ghostty if this machine actually has ghostty's terminfo

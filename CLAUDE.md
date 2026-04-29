@@ -96,11 +96,10 @@ The zshrc uses several idiomatic techniques to keep steady-state startup near ~2
    _evalcache starship init zsh
    _evalcache zoxide init zsh
    _evalcache fzf --zsh
-   _evalcache mise activate zsh --shims
    ```
    The cache lives in `~/.zsh-evalcache/`, keyed by the binary's mtime — upgrading the tool (e.g., `brew upgrade starship`) invalidates and regenerates automatically. First shell after an upgrade pays the subprocess cost once.
 
-2. **mise runs in `--shims` mode**, which adds `~/.local/share/mise/shims` to PATH but skips the `chpwd` hook. Tool versions still resolve per-directory via the shims reading `mise.toml`/`.tool-versions` at invocation. **Tradeoff**: mise's `[env]` per-project env-var injection is not applied — if you add a project that needs it, switch that project's block out or revert to full `mise activate zsh`.
+2. **mise's shim dir is added to PATH manually**, not via `mise activate`. We tried `_evalcache mise activate zsh --shims` first (which is what every mise readme suggests), but on Ubuntu it emits an extra `export PATH="/usr/bin:$PATH"` line that shadows `/usr/local/bin` — breaking bootstrap.sh's pinned binaries (notably fzf 0.68 vs apt's 0.29). Since `--shims` mode contributes nothing else (no `chpwd` hook, no env-var injection), `path=("$HOME/.local/share/mise/shims" $path)` is the equivalent without the side-effect, and is also faster (no subprocess). **Tradeoff**: mise's `[env]` per-project env-var injection is still not applied — if you add a project that needs it, swap in full `mise activate zsh` for that block.
 
 3. **`compinit` skips the audit on fresh zcompdumps.** The full security audit (`compaudit`) only runs when `~/.zcompdump` is older than 24 hours; otherwise `compinit -C` is used. This saves ~25ms per shell start.
 
