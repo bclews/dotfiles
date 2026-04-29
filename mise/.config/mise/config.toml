@@ -1,8 +1,15 @@
 [tools]
 go = "1.22.4"
-python = "3.11.0"
-ruby = "3.4.2"
+python = "3.11"          # latest 3.11.x with a precompiled binary (was "3.11.0")
+ruby = "3.4"             # latest 3.4.x with a precompiled binary (was "3.4.2")
 rust = "latest"
 
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]
+# Use precompiled binaries from python-build-standalone / ruby-build-binaries.
+# Source compiles need ~1GB of build space + lots of apt build deps, which
+# is a non-starter on shared VMs with small /home quotas (e.g. gen3-* hosts
+# ship with a 5GB /home). Tradeoff: gives up exact patch-version pinning,
+# and precompiled binaries occasionally lag upstream releases.
+python.compile = false
+ruby.compile = false
