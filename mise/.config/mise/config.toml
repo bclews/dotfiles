@@ -2,7 +2,9 @@
 go = "1.22.4"
 python = "3.11"          # latest 3.11.x with a precompiled binary (was "3.11.0")
 ruby = "3.4"             # latest 3.4.x with a precompiled binary (was "3.4.2")
-rust = "latest"
+# rust dropped from global pins — too heavy for small-/home VMs (gen3 fleet
+# ships 5GB /home; rust is ~300MB per user). Pin rust per-project in the
+# repo's own mise.toml when needed.
 
 [settings]
 idiomatic_version_file_enable_tools = ["ruby"]
