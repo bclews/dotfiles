@@ -2,3 +2,8 @@
 
 [ui]
 editor = "nvim"
+diff-formatter = ":git"
+pager = "delta"
+
+[git]
+private-commits = 'description(glob:"wip:*")'
