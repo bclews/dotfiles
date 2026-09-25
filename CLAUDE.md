@@ -98,10 +98,10 @@ The zshrc uses several idiomatic techniques to keep steady-state startup near ~2
 
 ### jj Configuration Security
 
-The jj package uses jj's multi-file config directory support to separate sensitive data:
+The jj package uses jj's `conf.d` support to separate sensitive data (jj only auto-loads `config.toml` and `conf.d/*.toml`, not arbitrary files like `user.toml` directly):
 - `jj/.config/jj/config.toml` contains public configuration (committed to repo)
-- `~/.config/jj/user.toml` contains name and email (local only, not committed)
-- When setting up on a new machine, create `~/.config/jj/user.toml`:
+- `~/.config/jj/conf.d/user.toml` contains name and email (local only, not committed)
+- When setting up on a new machine, create `~/.config/jj/conf.d/user.toml`:
   ```toml
   [user]
   name = "Your Name"

@@ -1,3 +1,16 @@
+# --- Homebrew shellenv ---
+# Must run before everything else: this exports HOMEBREW_PREFIX (consumed by
+# the antidote source line and the postgres block below) and prepends
+# /opt/homebrew/bin (Apple Silicon) or /usr/local/bin (Intel) to PATH. The
+# dotfiles assume brew-installed tools (nvim, stow, fd, bat, eza, gh, neovim,
+# antidote, postgresql@16, etc.) are reachable; without this, you get
+# `command not found` for everything brew installed.
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
 # --- History ---
 setopt HIST_IGNORE_DUPS
 setopt HIST_SAVE_NO_DUPS
@@ -88,3 +101,13 @@ _evalcache starship init zsh
 
 # --- Key bindings ---
 source ~/.zsh/keybindings.zsh
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/cle126/.local/bin:$PATH"
+
+# Added by Antigravity IDE
+export PATH="/Users/cle126/.antigravity-ide/antigravity-ide/bin:$PATH"
+
+# Added for TinyTeX (career repo's /apply CV/cover-letter pipeline)
+export PATH="$PATH:/Users/cle126/Library/TinyTeX/bin/universal-darwin"
